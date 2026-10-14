@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+:root {
+  --bg-page: #faf7f2;
+  --bg-surface: #ffffff;
+  --bg-surface-subtle: #f3eee6;
+  --text-main: #1b1815;
+  --text-muted: #5e574f;
+  --text-light: #877f76;
+  --border-subtle: #e5ded4;
+  --border-strong: #cfc4b6;
+  --accent-orange: #e8590c;
+  --accent-orange-hover: #cf4d07;
+  --accent-orange-soft: #ffeedb;
+  --accent-orange-border: #f8c9a3;
+  --badge-green-bg: #e6f4ea;
+  --badge-green-text: #137333;
+  --badge-amber-bg: #fef7e0;
+  --badge-amber-text: #b06000;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-page: #121110;
+    --bg-surface: #1a1917;
+    --bg-surface-subtle: #242220;
+    --text-main: #f3eee6;
+    --text-muted: #aba296;
+    --text-light: #7c746a;
+    --border-subtle: #2d2a26;
+    --border-strong: #3d3934;
+    --accent-orange: #ff7a2f;
+    --accent-orange-hover: #ff8e4d;
+    --accent-orange-soft: #382013;
+    --accent-orange-border: #5a2e15;
+    --badge-green-bg: #132d1e;
+    --badge-green-text: #5bb974;
+    --badge-amber-bg: #332711;
+    --badge-amber-text: #fdd663;
+  }
+}
+
+/* Explicit class-based override if toggled */
+html.dark {
+  --bg-page: #121110;
+  --bg-surface: #1a1917;
+  --bg-surface-subtle: #242220;
+  --text-main: #f3eee6;
+  --text-muted: #aba296;
+  --text-light: #7c746a;
+  --border-subtle: #2d2a26;
+  --border-strong: #3d3934;
+  --accent-orange: #ff7a2f;
+  --accent-orange-hover: #ff8e4d;
+  --accent-orange-soft: #382013;
+  --accent-orange-border: #5a2e15;
+  --badge-green-bg: #132d1e;
+  --badge-green-text: #5bb974;
+  --badge-amber-bg: #332711;
+  --badge-amber-text: #fdd663;
+}
+
+html.light {
+  --bg-page: #faf7f2;
+  --bg-surface: #ffffff;
+  --bg-surface-subtle: #f3eee6;
+  --text-main: #1b1815;
+  --text-muted: #5e574f;
+  --text-light: #877f76;
+  --border-subtle: #e5ded4;
+  --border-strong: #cfc4b6;
+  --accent-orange: #e8590c;
+  --accent-orange-hover: #cf4d07;
+  --accent-orange-soft: #ffeedb;
+  --accent-orange-border: #f8c9a3;
+  --badge-green-bg: #e6f4ea;
+  --badge-green-text: #137333;
+  --badge-amber-bg: #fef7e0;
+  --badge-amber-text: #b06000;
+}
+
+body {
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, .font-serif {
+  font-family: 'Source Serif 4', Georgia, Cambria, "Times New Roman", serif;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 9999px;
+}
