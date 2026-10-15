@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { ACADEMY_CONFIG, formatNaira, getWhatsAppRegistrationLink } from "../config";
 import { YouTubeLite } from "../components/YouTubeLite";
+import { OiOLogo } from "../components/OiOLogo";
+import { useAuth } from "../context/AuthContext";
 import {
   Scissors,
   Volume2,
@@ -23,18 +25,34 @@ import {
   HelpCircle,
   Laptop,
   Zap,
+  LayoutDashboard,
 } from "lucide-react";
 
 interface HomePageProps {
   onRegisterClick: () => void;
   onExploreCurriculum: () => void;
+  onNavigate?: (tab: string) => void;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ onRegisterClick }) => {
+export const HomePage: React.FC<HomePageProps> = ({
+  onRegisterClick,
+  onNavigate,
+}) => {
+  const { user, isEnrolled, isPending } = useAuth();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
+  };
+
+  const handlePrimaryAction = () => {
+    if (isEnrolled) {
+      if (onNavigate) onNavigate("dashboard");
+    } else if (isPending) {
+      if (onNavigate) onNavigate("pending");
+    } else {
+      onRegisterClick();
+    }
   };
 
   const scrollToCurriculum = () => {
@@ -160,12 +178,17 @@ export const HomePage: React.FC<HomePageProps> = ({ onRegisterClick }) => {
   return (
     <div className="space-y-16 sm:space-y-24 pb-24 sm:pb-16 text-[var(--text-main)]">
       {/* 1. HERO SECTION */}
-      <section className="pt-6 sm:pt-12 px-4 sm:px-6">
+      <section className="pt-4 sm:pt-8 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto text-center space-y-6">
+          {/* Official Brand Logo */}
+          <div className="flex justify-center pt-2">
+            <OiOLogo size="md" className="mx-auto" />
+          </div>
+
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--accent-orange-soft)] border border-[var(--accent-orange-border)] text-[var(--accent-orange)] text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>CapCut Masterclass • November 2026 Cohort</span>
+            <span>CapCut Masterclass • Starts Thursday, Nov 19, 2026</span>
           </div>
 
           {/* Main Headline */}
@@ -175,17 +198,31 @@ export const HomePage: React.FC<HomePageProps> = ({ onRegisterClick }) => {
 
           {/* Promise */}
           <p className="text-base sm:text-lg text-[var(--text-muted)] max-w-2xl mx-auto leading-relaxed">
-            A 5-day hands-on CapCut training by practicing editors in Ibadan. Master commercial pacing, clean audio, kinetic text, and freelance client workflows on your phone or laptop.
+            A 5-day hands-on CapCut training by practicing editors in Ibadan (2 classes per week, final class in week 3). Master commercial pacing, clean audio, kinetic text, and freelance client workflows on your phone or laptop.
           </p>
 
           {/* Action buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <button
-              onClick={onRegisterClick}
+              onClick={handlePrimaryAction}
               className="w-full sm:w-auto px-6 py-3.5 rounded-xl font-bold text-sm bg-[var(--accent-orange)] text-white hover:bg-[var(--accent-orange-hover)] shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
             >
-              <span>Reserve My Seat (₦20,000 Early-Bird)</span>
-              <ArrowRight className="w-4 h-4" />
+              {isEnrolled ? (
+                <>
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span>Go to My Dashboard (Enrolled)</span>
+                </>
+              ) : isPending ? (
+                <>
+                  <Clock className="w-4 h-4" />
+                  <span>Confirm Tuition & Unlock Seat</span>
+                </>
+              ) : (
+                <>
+                  <span>Reserve My Seat (₦20,000 Early-Bird)</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
 
             <button
@@ -511,11 +548,25 @@ export const HomePage: React.FC<HomePageProps> = ({ onRegisterClick }) => {
 
           <div className="pt-2">
             <button
-              onClick={onRegisterClick}
+              onClick={handlePrimaryAction}
               className="w-full py-4 px-6 rounded-xl font-bold text-sm sm:text-base bg-[var(--accent-orange)] text-white hover:bg-[var(--accent-orange-hover)] shadow-md transition-all flex items-center justify-center gap-2"
             >
-              <span>Reserve My Seat (₦20,000 Discount)</span>
-              <ArrowRight className="w-4 h-4" />
+              {isEnrolled ? (
+                <>
+                  <CheckCircle2 className="w-5 h-5 text-emerald-300" />
+                  <span>You Are Enrolled • Go to My Dashboard</span>
+                </>
+              ) : isPending ? (
+                <>
+                  <Clock className="w-4 h-4" />
+                  <span>Confirm Tuition & Unlock Learning Dashboard</span>
+                </>
+              ) : (
+                <>
+                  <span>Reserve My Seat (₦20,000 Discount)</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -567,8 +618,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onRegisterClick }) => {
       {/* 10. FINAL CALL TO ACTION + WHATSAPP */}
       <section className="px-4 sm:px-6">
         <div className="max-w-4xl mx-auto rounded-3xl p-8 sm:p-12 text-center bg-gradient-to-b from-[var(--bg-surface)] to-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] space-y-6">
-          <div className="inline-flex p-3 rounded-2xl bg-[var(--accent-orange-soft)] text-[var(--accent-orange)]">
-            <Video className="w-8 h-8" />
+          <div className="flex justify-center">
+            <OiOLogo size="sm" />
           </div>
 
           <div className="space-y-2 max-w-xl mx-auto">
@@ -582,11 +633,25 @@ export const HomePage: React.FC<HomePageProps> = ({ onRegisterClick }) => {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <button
-              onClick={onRegisterClick}
+              onClick={handlePrimaryAction}
               className="w-full sm:w-auto px-6 py-3.5 rounded-xl font-bold text-sm bg-[var(--accent-orange)] text-white hover:bg-[var(--accent-orange-hover)] shadow-md transition-all flex items-center justify-center gap-2"
             >
-              <span>Reserve My Seat (₦20,000)</span>
-              <ArrowRight className="w-4 h-4" />
+              {isEnrolled ? (
+                <>
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span>Go to My Dashboard</span>
+                </>
+              ) : isPending ? (
+                <>
+                  <Clock className="w-4 h-4" />
+                  <span>View Seat Confirmation & Bank Details</span>
+                </>
+              ) : (
+                <>
+                  <span>Reserve My Seat (₦20,000)</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
 
             <a
@@ -622,10 +687,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onRegisterClick }) => {
           </div>
         </div>
         <button
-          onClick={onRegisterClick}
+          onClick={handlePrimaryAction}
           className="flex-1 py-2.5 px-4 rounded-xl font-bold text-xs bg-[var(--accent-orange)] text-white shadow-sm active:scale-95 transition-all text-center"
         >
-          Reserve Seat
+          {isEnrolled ? "Go to Dashboard" : isPending ? "Confirm Seat" : "Reserve Seat"}
         </button>
       </div>
     </div>

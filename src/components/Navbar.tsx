@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { ACADEMY_CONFIG, getWhatsAppRegistrationLink } from "../config";
+import { OiOLogo } from "./OiOLogo";
 import {
   Video,
   Menu,
@@ -14,6 +15,9 @@ import {
   Sun,
   Moon,
   MessageCircle,
+  Award,
+  LayoutDashboard,
+  Sparkles,
 } from "lucide-react";
 
 interface NavbarProps {
@@ -55,45 +59,45 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
   return (
     <header className="sticky top-0 z-40 w-full border-b border-[var(--border-subtle)] bg-[var(--bg-page)]/95 backdrop-blur-md transition-colors">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-4">
-        {/* Brand Logo & Name */}
+        {/* Brand Logo with Official OiO Logo */}
         <button
-          onClick={() => handleNavClick("home")}
+          onClick={() => handleNavClick(isEnrolled ? "dashboard" : "home")}
           className="flex items-center gap-3 text-left group focus:outline-none"
         >
-          <div className="w-10 h-10 rounded-xl bg-[var(--accent-orange)] text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-            <Video className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-serif text-lg sm:text-xl font-bold tracking-tight text-[var(--text-main)]">
-                OiO Creative Academy
-              </span>
-              <span className="hidden sm:inline-block text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[var(--accent-orange-soft)] text-[var(--accent-orange)] border border-[var(--accent-orange-border)]">
-                Ibadan
-              </span>
-            </div>
-            <p className="text-[11px] sm:text-xs text-[var(--text-muted)] line-clamp-1">
-              {ACADEMY_CONFIG.TAGLINE}
-            </p>
-          </div>
+          <OiOLogo size="sm" />
         </button>
 
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-1.5 lg:gap-2 text-sm font-medium">
-          <button
-            onClick={() => handleNavClick("home")}
-            className={`px-3 py-1.5 rounded-lg transition-colors ${
-              currentTab === "home"
-                ? "bg-[var(--accent-orange-soft)] text-[var(--accent-orange)] font-semibold"
-                : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
-            }`}
-          >
-            Overview
-          </button>
+          {/* If NOT enrolled (guest or pending): show Overview */}
+          {(!user || !isEnrolled) && (
+            <button
+              onClick={() => handleNavClick("home")}
+              className={`px-3 py-1.5 rounded-lg transition-colors ${
+                currentTab === "home"
+                  ? "bg-[var(--accent-orange-soft)] text-[var(--accent-orange)] font-semibold"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
+              }`}
+            >
+              Overview
+            </button>
+          )}
 
-          {/* Student Links */}
+          {/* Enrolled Student Links: Dashboard is primary tab instead of Overview */}
           {user && isEnrolled && (
             <>
+              <button
+                onClick={() => handleNavClick("dashboard")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+                  currentTab === "dashboard"
+                    ? "bg-[var(--accent-orange-soft)] text-[var(--accent-orange)] font-semibold"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
+                }`}
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                <span>Dashboard</span>
+              </button>
+
               <button
                 onClick={() => handleNavClick("classes")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
@@ -105,6 +109,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
                 <Calendar className="w-4 h-4" />
                 <span>Live Classes</span>
               </button>
+
               <button
                 onClick={() => handleNavClick("recordings")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
@@ -116,6 +121,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
                 <BookOpen className="w-4 h-4" />
                 <span>Recordings</span>
               </button>
+
               <button
                 onClick={() => handleNavClick("materials")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
@@ -126,6 +132,18 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
               >
                 <FolderDown className="w-4 h-4" />
                 <span>Materials</span>
+              </button>
+
+              <button
+                onClick={() => handleNavClick("certificate")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+                  currentTab === "certificate"
+                    ? "bg-[var(--accent-orange-soft)] text-[var(--accent-orange)] font-semibold"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
+                }`}
+              >
+                <Award className="w-4 h-4" />
+                <span>Certificate</span>
               </button>
             </>
           )}
@@ -185,6 +203,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
                 <span className="hidden sm:inline max-w-[110px] truncate text-[var(--text-main)]">
                   {profile?.displayName?.split(" ")[0] || "Account"}
                 </span>
+                {isEnrolled && (
+                  <span className="text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-1.5 py-0.5 rounded font-bold">
+                    Enrolled
+                  </span>
+                )}
                 {isAdmin && (
                   <span className="text-[10px] bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 px-1.5 py-0.5 rounded font-semibold">
                     Admin
@@ -231,15 +254,24 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="md:hidden border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] px-4 py-4 space-y-2 shadow-xl animate-in slide-in-from-top-2">
-          <button
-            onClick={() => handleNavClick("home")}
-            className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)] flex items-center justify-between"
-          >
-            <span>Overview & Course Details</span>
-          </button>
+          {(!user || !isEnrolled) && (
+            <button
+              onClick={() => handleNavClick("home")}
+              className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)] flex items-center justify-between"
+            >
+              <span>Overview & Course Details</span>
+            </button>
+          )}
 
           {user && isEnrolled && (
             <>
+              <button
+                onClick={() => handleNavClick("dashboard")}
+                className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)] flex items-center gap-2 font-bold text-[var(--accent-orange)]"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                <span>My Dashboard</span>
+              </button>
               <button
                 onClick={() => handleNavClick("classes")}
                 className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)] flex items-center gap-2"
@@ -260,6 +292,13 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
               >
                 <FolderDown className="w-4 h-4 text-[var(--accent-orange)]" />
                 <span>Lesson Materials & Files</span>
+              </button>
+              <button
+                onClick={() => handleNavClick("certificate")}
+                className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)] flex items-center gap-2"
+              >
+                <Award className="w-4 h-4 text-[var(--accent-orange)]" />
+                <span>Certificate of Completion</span>
               </button>
             </>
           )}

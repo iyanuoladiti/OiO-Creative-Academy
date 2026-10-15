@@ -87,6 +87,43 @@ body {
   padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Authentic Fingerprint / Topographic Contour Friction Ridge Pattern (Light Mode) */
+  background-image: 
+    radial-gradient(circle at 50% 10%, rgba(232, 89, 12, 0.08) 0%, transparent 55%),
+    radial-gradient(circle at 85% 60%, rgba(232, 89, 12, 0.04) 0%, transparent 40%),
+    url("data:image/svg+xml,%3Csvg width='360' height='360' viewBox='0 0 360 360' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%231b1815' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.11'%3E%3C!-- Central Fingerprint Whorl Core --%3E%3Cellipse cx='180' cy='180' rx='12' ry='16' /%3E%3Cellipse cx='180' cy='180' rx='26' ry='32' /%3E%3Cellipse cx='180' cy='180' rx='42' ry='50' /%3E%3Cellipse cx='180' cy='180' rx='60' ry='70' /%3E%3Cellipse cx='180' cy='180' rx='80' ry='92' /%3E%3Cellipse cx='180' cy='180' rx='102' ry='116' /%3E%3Cellipse cx='180' cy='180' rx='126' ry='142' /%3E%3Cellipse cx='180' cy='180' rx='152' ry='170' /%3E%3Cellipse cx='180' cy='180' rx='180' ry='200' /%3E%3C!-- Outer arch & loop contours --%3E%3Cpath d='M10 180 C 10 90, 80 20, 180 20 S 350 90, 350 180 S 280 340, 180 340 S 10 270, 10 180' /%3E%3Cpath d='M-30 180 C -30 60, 60 -30, 180 -30 S 390 60, 390 180 S 300 390, 180 390 S -30 300, -30 180' /%3E%3Cpath d='M50 0 C 110 50, 180 30, 250 0' stroke='%23e8590c' stroke-opacity='0.12' /%3E%3Cpath d='M30 360 C 110 310, 250 310, 330 360' stroke='%23e8590c' stroke-opacity='0.12' /%3E%3Cpath d='M0 90 C 80 120, 120 240, 0 270' /%3E%3Cpath d='M360 90 C 280 120, 240 240, 360 270' /%3E%3C/g%3E%3C/svg%3E");
+  background-attachment: fixed;
+  background-size: auto, auto, 360px 360px;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    /* Rich Fingerprint Ridge Overlay (Dark Mode) - Warm glowing ridges on charcoal */
+    background-image: 
+      radial-gradient(circle at 50% 12%, rgba(255, 122, 47, 0.12) 0%, transparent 60%),
+      radial-gradient(circle at 90% 70%, rgba(255, 122, 47, 0.08) 0%, transparent 45%),
+      url("data:image/svg+xml,%3Csvg width='360' height='360' viewBox='0 0 360 360' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23ff7a2f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.16'%3E%3C!-- Central Fingerprint Whorl Core --%3E%3Cellipse cx='180' cy='180' rx='12' ry='16' /%3E%3Cellipse cx='180' cy='180' rx='26' ry='32' /%3E%3Cellipse cx='180' cy='180' rx='42' ry='50' /%3E%3Cellipse cx='180' cy='180' rx='60' ry='70' /%3E%3Cellipse cx='180' cy='180' rx='80' ry='92' /%3E%3Cellipse cx='180' cy='180' rx='102' ry='116' /%3E%3Cellipse cx='180' cy='180' rx='126' ry='142' /%3E%3Cellipse cx='180' cy='180' rx='152' ry='170' /%3E%3Cellipse cx='180' cy='180' rx='180' ry='200' /%3E%3C!-- Secondary organic loops & arches --%3E%3Cpath d='M10 180 C 10 90, 80 20, 180 20 S 350 90, 350 180 S 280 340, 180 340 S 10 270, 10 180' stroke='%23f3eee6' stroke-opacity='0.12' /%3E%3Cpath d='M-30 180 C -30 60, 60 -30, 180 -30 S 390 60, 390 180 S 300 390, 180 390 S -30 300, -30 180' stroke='%23f3eee6' stroke-opacity='0.09' /%3E%3Cpath d='M50 0 C 110 50, 180 30, 250 0' /%3E%3Cpath d='M30 360 C 110 310, 250 310, 330 360' /%3E%3Cpath d='M0 90 C 80 120, 120 240, 0 270' stroke='%23f3eee6' stroke-opacity='0.1' /%3E%3Cpath d='M360 90 C 280 120, 240 240, 360 270' stroke='%23f3eee6' stroke-opacity='0.1' /%3E%3C/g%3E%3C/svg%3E");
+    background-attachment: fixed;
+    background-size: auto, auto, 360px 360px;
+  }
+}
+
+html.dark body {
+  background-image: 
+    radial-gradient(circle at 50% 12%, rgba(255, 122, 47, 0.12) 0%, transparent 60%),
+    radial-gradient(circle at 90% 70%, rgba(255, 122, 47, 0.08) 0%, transparent 45%),
+    url("data:image/svg+xml,%3Csvg width='360' height='360' viewBox='0 0 360 360' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23ff7a2f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.16'%3E%3C!-- Central Fingerprint Whorl Core --%3E%3Cellipse cx='180' cy='180' rx='12' ry='16' /%3E%3Cellipse cx='180' cy='180' rx='26' ry='32' /%3E%3Cellipse cx='180' cy='180' rx='42' ry='50' /%3E%3Cellipse cx='180' cy='180' rx='60' ry='70' /%3E%3Cellipse cx='180' cy='180' rx='80' ry='92' /%3E%3Cellipse cx='180' cy='180' rx='102' ry='116' /%3E%3Cellipse cx='180' cy='180' rx='126' ry='142' /%3E%3Cellipse cx='180' cy='180' rx='152' ry='170' /%3E%3Cellipse cx='180' cy='180' rx='180' ry='200' /%3E%3C!-- Secondary organic loops & arches --%3E%3Cpath d='M10 180 C 10 90, 80 20, 180 20 S 350 90, 350 180 S 280 340, 180 340 S 10 270, 10 180' stroke='%23f3eee6' stroke-opacity='0.12' /%3E%3Cpath d='M-30 180 C -30 60, 60 -30, 180 -30 S 390 60, 390 180 S 300 390, 180 390 S -30 300, -30 180' stroke='%23f3eee6' stroke-opacity='0.09' /%3E%3Cpath d='M50 0 C 110 50, 180 30, 250 0' /%3E%3Cpath d='M30 360 C 110 310, 250 310, 330 360' /%3E%3Cpath d='M0 90 C 80 120, 120 240, 0 270' stroke='%23f3eee6' stroke-opacity='0.1' /%3E%3Cpath d='M360 90 C 280 120, 240 240, 360 270' stroke='%23f3eee6' stroke-opacity='0.1' /%3E%3C/g%3E%3C/svg%3E");
+  background-attachment: fixed;
+  background-size: auto, auto, 360px 360px;
+}
+
+html.light body {
+  background-image: 
+    radial-gradient(circle at 50% 10%, rgba(232, 89, 12, 0.08) 0%, transparent 55%),
+    radial-gradient(circle at 85% 60%, rgba(232, 89, 12, 0.04) 0%, transparent 40%),
+    url("data:image/svg+xml,%3Csvg width='360' height='360' viewBox='0 0 360 360' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%231b1815' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.11'%3E%3C!-- Central Fingerprint Whorl Core --%3E%3Cellipse cx='180' cy='180' rx='12' ry='16' /%3E%3Cellipse cx='180' cy='180' rx='26' ry='32' /%3E%3Cellipse cx='180' cy='180' rx='42' ry='50' /%3E%3Cellipse cx='180' cy='180' rx='60' ry='70' /%3E%3Cellipse cx='180' cy='180' rx='80' ry='92' /%3E%3Cellipse cx='180' cy='180' rx='102' ry='116' /%3E%3Cellipse cx='180' cy='180' rx='126' ry='142' /%3E%3Cellipse cx='180' cy='180' rx='152' ry='170' /%3E%3Cellipse cx='180' cy='180' rx='180' ry='200' /%3E%3C!-- Outer arch & loop contours --%3E%3Cpath d='M10 180 C 10 90, 80 20, 180 20 S 350 90, 350 180 S 280 340, 180 340 S 10 270, 10 180' /%3E%3Cpath d='M-30 180 C -30 60, 60 -30, 180 -30 S 390 60, 390 180 S 300 390, 180 390 S -30 300, -30 180' /%3E%3Cpath d='M50 0 C 110 50, 180 30, 250 0' stroke='%23e8590c' stroke-opacity='0.12' /%3E%3Cpath d='M30 360 C 110 310, 250 310, 330 360' stroke='%23e8590c' stroke-opacity='0.12' /%3E%3Cpath d='M0 90 C 80 120, 120 240, 0 270' /%3E%3Cpath d='M360 90 C 280 120, 240 240, 360 270' /%3E%3C/g%3E%3C/svg%3E");
+  background-attachment: fixed;
+  background-size: auto, auto, 360px 360px;
 }
 
 h1, h2, h3, h4, .font-serif {

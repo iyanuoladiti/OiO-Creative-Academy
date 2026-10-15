@@ -21,6 +21,8 @@ import {
   PaymentRecord,
 } from "../types";
 import { ACADEMY_CONFIG, formatNaira } from "../config";
+import { OiOLogo } from "../components/OiOLogo";
+import { verifyPaymentWithAI, AIPaymentVerificationResult } from "../services/aiPaymentVerifier";
 import {
   Users,
   Calendar,
@@ -40,6 +42,7 @@ import {
   AlertCircle,
   Copy,
   Check,
+  Bot,
 } from "lucide-react";
 
 export const AdminDashboard: React.FC = () => {
@@ -104,6 +107,8 @@ export const AdminDashboard: React.FC = () => {
   });
 
   const [actionStatus, setActionStatus] = useState<string | null>(null);
+  const [aiAuditingId, setAiAuditingId] = useState<string | null>(null);
+  const [aiAuditResults, setAiAuditResults] = useState<Record<string, AIPaymentVerificationResult>>({});
 
   // 1. Listen to students
   useEffect(() => {
@@ -277,6 +282,36 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleApprovePaymentAndEnroll = async (p: PaymentRecord) => {
+    try {
+      await updateDoc(doc(db, "payments", p.id), {
+        status: "verified",
+        updatedAt: new Date().toISOString(),
+      });
+      await updateDoc(doc(db, "users", p.userId), {
+        enrollmentStatus: "enrolled",
+        enrolledAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      setActionStatus(`Approved payment & enrolled ${p.userName}!`);
+      setTimeout(() => setActionStatus(null), 4000);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `payments/${p.id}`);
+    }
+  };
+
+  const handleRunAdminAiAudit = async (p: PaymentRecord) => {
+    setAiAuditingId(p.id);
+    try {
+      const res = await verifyPaymentWithAI(`${p.reference} ${p.notes || ""}`);
+      setAiAuditResults((prev) => ({ ...prev, [p.id]: res }));
+    } catch (err) {
+      console.warn("AI audit error:", err);
+    } finally {
+      setAiAuditingId(null);
+    }
+  };
+
   // Class session actions
   const handleSaveClass = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -421,7 +456,7 @@ export const AdminDashboard: React.FC = () => {
         order: 1,
         title: "Day 1 — Foundation: Getting Started & Timeline Basics",
         description: "Interface tour (mobile & PC), media import, trim, split, clip arrangement, and assembling a 15-second story.",
-        date: "2026-11-07",
+        date: "2026-11-19",
         startTime: "19:00",
         endTime: "20:30",
         meetUrl: "https://meet.google.com/oio-capcut-day01",
@@ -431,7 +466,7 @@ export const AdminDashboard: React.FC = () => {
         order: 2,
         title: "Day 2 — Timeline, Transitions & Audio Mixing",
         description: "Cut to the beat, speed ramps, smooth transitions, dialogue clarity, background music and SFX balance.",
-        date: "2026-11-08",
+        date: "2026-11-21",
         startTime: "19:00",
         endTime: "20:30",
         meetUrl: "https://meet.google.com/oio-capcut-day02",
@@ -441,7 +476,7 @@ export const AdminDashboard: React.FC = () => {
         order: 3,
         title: "Day 3 — Text, Captions, Effects & Vertical Reels",
         description: "Kinetic animated titles, auto-captions styling, stickers, visual effects, and 9:16 vertical hook structures for TikTok & Reels.",
-        date: "2026-11-14",
+        date: "2026-11-26",
         startTime: "19:00",
         endTime: "20:30",
         meetUrl: "https://meet.google.com/oio-capcut-day03",
@@ -451,7 +486,7 @@ export const AdminDashboard: React.FC = () => {
         order: 4,
         title: "Day 4 — Keyframes, Masking, Overlays & Color",
         description: "Keyframe zooms, green-screen chroma key, background cutout removal, color adjustments, and product video commercials.",
-        date: "2026-11-21",
+        date: "2026-11-28",
         startTime: "19:00",
         endTime: "20:30",
         meetUrl: "https://meet.google.com/oio-capcut-day04",
@@ -459,9 +494,9 @@ export const AdminDashboard: React.FC = () => {
       },
       {
         order: 5,
-        title: "Day 5 — Professional Export & Freelance Client Strategy",
+        title: "Day 5 — Professional Export & Freelance Client Strategy (Final Class)",
         description: "Full project build, export settings (1080x1920 / 1920x1080), client discovery, portfolio presentation, pricing, and final assessment rubric.",
-        date: "2026-11-28",
+        date: "2026-12-03",
         startTime: "19:00",
         endTime: "20:30",
         meetUrl: "https://meet.google.com/oio-capcut-day05",
@@ -498,21 +533,24 @@ export const AdminDashboard: React.FC = () => {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6 text-[var(--text-main)]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs uppercase font-bold tracking-wider text-purple-600 dark:text-purple-400">
-              OiO Creative Academy
-            </span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
-              Admin Portal
-            </span>
+        <div className="space-y-2">
+          <OiOLogo size="sm" />
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs uppercase font-bold tracking-wider text-purple-600 dark:text-purple-400">
+                OiO Creative Academy
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                Admin Portal
+              </span>
+            </div>
+            <h2 className="font-serif text-2xl sm:text-4xl font-bold text-[var(--text-main)] mt-1">
+              Academy Management
+            </h2>
+            <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1">
+              Manage student enrollments, Google Meet links, session recordings, and notices.
+            </p>
           </div>
-          <h2 className="font-serif text-2xl sm:text-4xl font-bold text-[var(--text-main)] mt-1">
-            Academy Management
-          </h2>
-          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1">
-            Manage student enrollments, Google Meet links, session recordings, and notices.
-          </p>
         </div>
 
         {/* Status Toast */}
@@ -1038,49 +1076,99 @@ export const AdminDashboard: React.FC = () => {
                   <th className="p-3.5">Student</th>
                   <th className="p-3.5">Amount</th>
                   <th className="p-3.5">Mode</th>
-                  <th className="p-3.5">Reference</th>
+                  <th className="p-3.5">Reference & Narration</th>
                   <th className="p-3.5">Date</th>
                   <th className="p-3.5">Status</th>
+                  <th className="p-3.5 text-right">Actions & AI Audit</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-subtle)]">
                 {payments.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-6 text-center text-[var(--text-muted)]">
+                    <td colSpan={7} className="p-6 text-center text-[var(--text-muted)]">
                       No payment records received yet.
                     </td>
                   </tr>
                 ) : (
-                  payments.map((p) => (
-                    <tr key={p.id} className="hover:bg-[var(--bg-surface-subtle)]/50">
-                      <td className="p-3.5 space-y-0.5">
-                        <div className="font-bold text-[var(--text-main)]">{p.userName}</div>
-                        <div className="text-[11px] text-[var(--text-light)]">{p.userEmail}</div>
-                      </td>
-                      <td className="p-3.5 font-bold text-[var(--text-main)]">
-                        {formatNaira(p.amountNaira)}
-                      </td>
-                      <td className="p-3.5 uppercase font-semibold text-[10px] text-[var(--text-light)]">
-                        {p.mode}
-                      </td>
-                      <td className="p-3.5 font-mono text-xs font-bold text-[var(--text-main)]">
-                        {p.reference}
-                        {p.notes && (
-                          <div className="text-[10px] font-normal text-[var(--text-muted)]">
-                            {p.notes}
+                  payments.map((p) => {
+                    const aiResult = aiAuditResults[p.id];
+                    const isAuditing = aiAuditingId === p.id;
+
+                    return (
+                      <tr key={p.id} className="hover:bg-[var(--bg-surface-subtle)]/50">
+                        <td className="p-3.5 space-y-0.5">
+                          <div className="font-bold text-[var(--text-main)]">{p.userName}</div>
+                          <div className="text-[11px] text-[var(--text-light)]">{p.userEmail}</div>
+                        </td>
+                        <td className="p-3.5 font-bold text-[var(--text-main)]">
+                          {formatNaira(p.amountNaira)}
+                        </td>
+                        <td className="p-3.5 uppercase font-semibold text-[10px] text-[var(--text-light)]">
+                          {p.mode}
+                        </td>
+                        <td className="p-3.5 space-y-1">
+                          <div className="font-mono text-xs font-bold text-[var(--text-main)]">
+                            {p.reference}
                           </div>
-                        )}
-                      </td>
-                      <td className="p-3.5 text-[var(--text-light)]">
-                        {new Date(p.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="p-3.5">
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
-                          {p.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                          {p.notes && (
+                            <div className="text-[10px] font-normal text-[var(--text-muted)] max-w-xs break-words">
+                              {p.notes}
+                            </div>
+                          )}
+                          {aiResult && (
+                            <div className="mt-1.5 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-800 dark:text-emerald-300 space-y-0.5">
+                              <div className="font-bold flex items-center gap-1">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                <span>AI Audit: {aiResult.summary}</span>
+                              </div>
+                              <div className="text-[9px] text-[var(--text-muted)]">
+                                Match: {aiResult.detectedBank} • Acct: {aiResult.detectedAccount} • Confidence: {aiResult.confidence}
+                              </div>
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-3.5 text-[var(--text-light)]">
+                          {new Date(p.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="p-3.5">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              p.status === "verified"
+                                ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
+                                : "bg-amber-500/15 text-amber-700 dark:text-amber-400"
+                            }`}
+                          >
+                            {p.status}
+                          </span>
+                        </td>
+                        <td className="p-3.5 text-right space-x-1.5 whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => handleRunAdminAiAudit(p)}
+                            disabled={isAuditing}
+                            className="px-2.5 py-1 rounded-lg text-[11px] font-medium border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-subtle)] text-[var(--accent-orange)] transition-colors"
+                            title="Audit this bank reference using Gemini AI agent"
+                          >
+                            <span className="flex items-center gap-1">
+                              <Bot className="w-3 h-3" />
+                              <span>{isAuditing ? "Auditing..." : "AI Audit"}</span>
+                            </span>
+                          </button>
+
+                          {p.status === "pending" && (
+                            <button
+                              type="button"
+                              onClick={() => handleApprovePaymentAndEnroll(p)}
+                              className="px-3 py-1 rounded-lg text-[11px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-xs"
+                              title="Approve payment and enroll student immediately"
+                            >
+                              Approve & Enroll
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

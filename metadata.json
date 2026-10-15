@@ -1,6 +1,6 @@
 {
   "name": "OiO Creative Academy",
-  "description": "Website and learning platform for OiO Creative Academy in Ibadan, Nigeria. Video editing training, live Google Meet sessions, recordings, and student dashboard.",
+  "description": "Website and learning platform for OiO Creative Academy. All our trainings, live learning sessions, recordings, and student dashboard.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

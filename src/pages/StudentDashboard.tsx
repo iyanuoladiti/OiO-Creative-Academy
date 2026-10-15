@@ -5,6 +5,7 @@ import { collection, onSnapshot, query, orderBy, limit } from "firebase/firestor
 import { ClassSession, Recording, Announcement } from "../types";
 import { ACADEMY_CONFIG } from "../config";
 import { YouTubeLite } from "../components/YouTubeLite";
+import { OiOLogo } from "../components/OiOLogo";
 import {
   Calendar,
   Clock,
@@ -23,6 +24,8 @@ import {
   Circle,
   Smartphone,
   Laptop,
+  Lock,
+  Award,
 } from "lucide-react";
 
 interface StudentDashboardProps {
@@ -36,6 +39,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onNavigate }
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [now, setNow] = useState<Date>(new Date());
+  const [lockedNotice, setLockedNotice] = useState<string | null>(null);
 
   // Personal completed days checklist (stored in localStorage per student)
   const [completedDays, setCompletedDays] = useState<number[]>(() => {
@@ -48,8 +52,27 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onNavigate }
     }
   });
 
+  const checkDayPassed = (item: (typeof ACADEMY_CONFIG.SYLLABUS_DAYS)[0]) => {
+    const matchingClass = classes.find((c) => c.order === item.day);
+    if (matchingClass?.status === "completed") return true;
+    const sessionDateStr = matchingClass ? matchingClass.date : item.dateIso;
+    const sessionEndTime = matchingClass ? matchingClass.endTime : item.endTime || "20:30";
+    try {
+      const sessionEnd = new Date(`${sessionDateStr}T${sessionEndTime}:00+01:00`);
+      return now >= sessionEnd;
+    } catch {
+      return false;
+    }
+  };
+
   const toggleDayCheck = (dayNum: number) => {
     if (!user) return;
+    const targetDayConfig = ACADEMY_CONFIG.SYLLABUS_DAYS.find((d) => d.day === dayNum);
+    if (targetDayConfig && !checkDayPassed(targetDayConfig)) {
+      setLockedNotice(`Day ${dayNum} is locked. It unlocks after the live class on ${targetDayConfig.dateFormatted} (${targetDayConfig.time} WAT).`);
+      setTimeout(() => setLockedNotice(null), 4000);
+      return;
+    }
     const updated = completedDays.includes(dayNum)
       ? completedDays.filter((d) => d !== dayNum)
       : [...completedDays, dayNum];
@@ -208,21 +231,24 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onNavigate }
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 text-[var(--text-main)]">
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs uppercase font-bold tracking-wider text-[var(--accent-orange)]">
-              Student Learning Portal
-            </span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
-              Enrolled Student
-            </span>
+        <div className="space-y-3">
+          <OiOLogo size="sm" />
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs uppercase font-bold tracking-wider text-[var(--accent-orange)]">
+                Student Learning Portal
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                Enrolled Student
+              </span>
+            </div>
+            <h2 className="font-serif text-2xl sm:text-4xl font-bold text-[var(--text-main)] mt-1">
+              Welcome back, {profile?.displayName?.split(" ")[0] || "Student"}
+            </h2>
+            <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1">
+              {ACADEMY_CONFIG.COURSE_NAME} • {ACADEMY_CONFIG.COURSE_DURATION}
+            </p>
           </div>
-          <h2 className="font-serif text-2xl sm:text-4xl font-bold text-[var(--text-main)] mt-1">
-            Welcome back, {profile?.displayName?.split(" ")[0] || "Student"}
-          </h2>
-          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1">
-            {ACADEMY_CONFIG.COURSE_NAME} • {ACADEMY_CONFIG.COURSE_DURATION}
-          </p>
         </div>
 
         {/* CapCut format badge & WhatsApp */}
@@ -328,14 +354,21 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onNavigate }
               5-Day CapCut Modules Checklist:
             </h4>
             <span className="text-[11px] text-[var(--text-muted)]">
-              Tap to track your practical exercises
+              Unlocks as each class passes in November 2026
             </span>
           </div>
 
+          {lockedNotice && (
+            <div className="p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs flex items-center gap-2 animate-in fade-in duration-200">
+              <Lock className="w-4 h-4 shrink-0 text-amber-600" />
+              <span>{lockedNotice}</span>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
             {ACADEMY_CONFIG.SYLLABUS_DAYS.map((item) => {
+              const hasPassed = checkDayPassed(item);
               const isChecked = completedDays.includes(item.day);
-              // Check if matching class in firestore is past
               const matchingClass = classes.find((c) => c.order === item.day);
               const isSessionDone = matchingClass && isClassPast(matchingClass);
               const isDone = isChecked || isSessionDone;
@@ -344,18 +377,30 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onNavigate }
                 <div
                   key={item.day}
                   onClick={() => toggleDayCheck(item.day)}
-                  className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 select-none ${
-                    isDone
-                      ? "bg-emerald-500/5 border-emerald-500/30 hover:border-emerald-500"
-                      : "bg-[var(--bg-surface-subtle)] border-[var(--border-subtle)] hover:border-[var(--accent-orange)]"
+                  className={`p-3.5 rounded-2xl border transition-all select-none flex items-start gap-3 ${
+                    !hasPassed
+                      ? "opacity-55 cursor-not-allowed bg-[var(--bg-surface-subtle)]/60 border-[var(--border-subtle)]"
+                      : isDone
+                      ? "bg-emerald-500/5 border-emerald-500/30 hover:border-emerald-500 cursor-pointer"
+                      : "bg-[var(--bg-surface-subtle)] border-[var(--border-subtle)] hover:border-[var(--accent-orange)] cursor-pointer"
                   }`}
+                  title={
+                    !hasPassed
+                      ? `Locked: Day ${item.day} will unlock on ${item.dateFormatted} after the live class.`
+                      : isDone
+                      ? "Click to uncheck"
+                      : "Click to mark as completed"
+                  }
                 >
                   <button
                     type="button"
+                    disabled={!hasPassed}
                     aria-label={`Toggle Day ${item.day}`}
                     className="mt-0.5 shrink-0"
                   >
-                    {isDone ? (
+                    {!hasPassed ? (
+                      <Lock className="w-4 h-4 text-[var(--text-light)] mt-0.5" />
+                    ) : isDone ? (
                       <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                     ) : (
                       <Circle className="w-5 h-5 text-[var(--text-light)]" />
@@ -374,10 +419,46 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onNavigate }
                     <p className="text-[11px] text-[var(--text-muted)] line-clamp-1">
                       {item.goal}
                     </p>
+                    <div className="flex items-center justify-between pt-0.5 text-[10px]">
+                      <span className="text-[var(--text-light)]">
+                        {item.dateFormatted}
+                      </span>
+                      {!hasPassed && (
+                        <span className="text-amber-700 dark:text-amber-400 font-semibold flex items-center gap-1">
+                          <Lock className="w-2.5 h-2.5" />
+                          <span>Unlocks after class</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
             })}
+          </div>
+
+          {/* Certificate of completion quick link */}
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-2xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-orange-500/10 text-[var(--accent-orange)] flex items-center justify-center shrink-0">
+                <Award className="w-5 h-5" />
+              </div>
+              <div>
+                <h5 className="font-serif text-xs sm:text-sm font-bold text-[var(--text-main)]">
+                  CapCut Masterclass Certificate of Completion
+                </h5>
+                <p className="text-[11px] text-[var(--text-muted)]">
+                  Issued upon completing the 5 days • Official credential with RC 8014049
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => onNavigate("certificate")}
+              className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold bg-[var(--accent-orange)] text-white hover:bg-[var(--accent-orange-hover)] transition-all flex items-center justify-center gap-1.5 shrink-0"
+            >
+              <span>View My Certificate</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       </section>

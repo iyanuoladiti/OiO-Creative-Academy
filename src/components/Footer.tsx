@@ -1,5 +1,6 @@
 import React from "react";
 import { ACADEMY_CONFIG, getWhatsAppRegistrationLink } from "../config";
+import { OiOLogo } from "./OiOLogo";
 import { MessageCircle, MapPin, Mail, ArrowUpRight } from "lucide-react";
 
 export const Footer: React.FC<{ onOpenAuth: () => void }> = ({ onOpenAuth }) => {
@@ -8,10 +9,8 @@ export const Footer: React.FC<{ onOpenAuth: () => void }> = ({ onOpenAuth }) => 
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand info */}
-          <div className="space-y-3">
-            <h4 className="font-serif text-lg font-bold text-[var(--text-main)]">
-              {ACADEMY_CONFIG.ACADEMY_NAME}
-            </h4>
+          <div className="space-y-4">
+            <OiOLogo size="sm" />
             <p className="text-sm italic font-serif text-[var(--text-main)] opacity-90">
               "{ACADEMY_CONFIG.TAGLINE}"
             </p>

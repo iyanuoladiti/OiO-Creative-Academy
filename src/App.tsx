@@ -10,6 +10,7 @@ import { LiveClassesPage } from "./pages/LiveClassesPage";
 import { RecordingsPage } from "./pages/RecordingsPage";
 import { MaterialsPage } from "./pages/MaterialsPage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { CertificatePage } from "./pages/CertificatePage";
 import { AdminDashboard } from "./pages/AdminDashboard";
 
 function MainContent() {
@@ -38,7 +39,7 @@ function MainContent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg-page)] text-[var(--text-main)] transition-colors selection:bg-orange-500/20 selection:text-orange-950 dark:selection:text-orange-200">
+    <div className="min-h-screen flex flex-col bg-transparent text-[var(--text-main)] transition-colors selection:bg-orange-500/20 selection:text-orange-950 dark:selection:text-orange-200">
       <Navbar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
@@ -60,6 +61,7 @@ function MainContent() {
             {currentTab === "home" && (
               <HomePage
                 onRegisterClick={() => handleOpenAuth("signup")}
+                onNavigate={(tab) => setCurrentTab(tab)}
                 onExploreCurriculum={() => {
                   const el = document.getElementById("curriculum");
                   if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -68,7 +70,7 @@ function MainContent() {
             )}
 
             {currentTab === "pending" && (
-              <PendingScreen />
+              <PendingScreen onNavigateToDashboard={() => setCurrentTab("dashboard")} />
             )}
 
             {currentTab === "dashboard" && isEnrolled && (
@@ -85,6 +87,10 @@ function MainContent() {
 
             {currentTab === "materials" && isEnrolled && (
               <MaterialsPage />
+            )}
+
+            {currentTab === "certificate" && isEnrolled && (
+              <CertificatePage />
             )}
 
             {currentTab === "profile" && user && (

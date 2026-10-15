@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { ACADEMY_CONFIG } from "../config";
+import { OiOLogo } from "./OiOLogo";
 import { X, Mail, Lock, User, Phone, AlertCircle, ArrowRight } from "lucide-react";
 
 interface AuthModalProps {
@@ -49,7 +50,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       onClose();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Authentication error occurred.";
-      if (msg.includes("auth/email-already-in-use")) {
+      if (msg.includes("auth/operation-not-allowed")) {
+        setError(
+          "Email/Password sign-in is disabled in your Firebase project. Please click 'Continue with Google' above (works instantly), or enable Email/Password in Firebase Console -> Authentication -> Sign-in method."
+        );
+      } else if (msg.includes("auth/email-already-in-use")) {
         setError("This email is already registered. Please sign in instead.");
       } else if (msg.includes("auth/wrong-password") || msg.includes("auth/invalid-credential")) {
         setError("Incorrect email or password. Please try again.");
@@ -89,11 +94,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <X className="w-5 h-5" />
         </button>
 
-        {/* Heading */}
-        <div className="mb-6">
-          <span className="text-xs uppercase font-bold tracking-wider text-[var(--accent-orange)]">
-            OiO Creative Academy
-          </span>
+        {/* Heading & Logo */}
+        <div className="mb-5 flex flex-col items-center text-center">
+          <OiOLogo size="sm" className="mb-3" />
           <h3 className="font-serif text-2xl font-bold mt-1 text-[var(--text-main)]">
             {mode === "signup" ? "Reserve Your Seat" : "Welcome Back"}
           </h3>
@@ -136,11 +139,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
         </div>
 
-        {/* Error message */}
+        {/* Error message with 1-click Google shortcut */}
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>{error}</span>
+          <div className="mb-4 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs space-y-2">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+              <span className="leading-relaxed">{error}</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              className="w-full py-2 px-3 rounded-lg font-bold bg-[var(--accent-orange)] text-white hover:bg-[var(--accent-orange-hover)] transition-all flex items-center justify-center gap-1.5 shadow-xs"
+            >
+              <span>👉 Click Here to Continue with Google (Works Instantly)</span>
+            </button>
           </div>
         )}
 
@@ -149,7 +161,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           type="button"
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="w-full py-2.5 px-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-subtle)] text-xs sm:text-sm font-medium flex items-center justify-center gap-2.5 transition-colors mb-4 disabled:opacity-50"
+          className="w-full py-3 px-4 rounded-xl border-2 border-[var(--accent-orange)] bg-[var(--accent-orange-soft)]/40 hover:bg-[var(--accent-orange-soft)] text-xs sm:text-sm font-bold flex items-center justify-center gap-2.5 transition-all mb-4 disabled:opacity-50 text-[var(--text-main)] shadow-xs"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path
@@ -169,7 +181,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
             />
           </svg>
-          <span>Continue with Google</span>
+          <span>Continue with Google (Recommended · 1-Click Access)</span>
         </button>
 
         <div className="relative my-4 text-center">
