@@ -27,7 +27,11 @@ import {
   Bot,
 } from "lucide-react";
 
-export const PendingScreen: React.FC = () => {
+interface PendingScreenProps {
+  onNavigateToDashboard?: () => void;
+}
+
+export const PendingScreen: React.FC<PendingScreenProps> = ({ onNavigateToDashboard }) => {
   const { user, profile, submitPaymentProof } = useAuth();
   const [copied, setCopied] = useState(false);
   const [reference, setReference] = useState("");
