@@ -11,14 +11,17 @@ import {
   ShieldCheck,
   Download,
   Sparkles,
+  ArrowLeft,
 } from "lucide-react";
 
 interface CertificatePageProps {
   completedPercentage?: number;
+  onBack?: () => void;
 }
 
 export const CertificatePage: React.FC<CertificatePageProps> = ({
   completedPercentage = 100,
+  onBack,
 }) => {
   const { user, profile } = useAuth();
   const certRef = useRef<HTMLDivElement>(null);
@@ -45,7 +48,20 @@ export const CertificatePage: React.FC<CertificatePageProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8 text-[var(--text-main)]">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8 text-[var(--text-main)]">
+      {/* Top Back Navigation for Mobile & Desktop */}
+      {onBack && (
+        <div className="no-print">
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-subtle)] text-xs font-semibold text-[var(--text-main)] transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-[var(--accent-orange)]" />
+            <span>Back to Dashboard</span>
+          </button>
+        </div>
+      )}
+
       {/* Top Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-6 no-print">
         <div className="space-y-1">

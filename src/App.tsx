@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { NavigationProvider, useNavigation, NavTab } from "./context/NavigationContext";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { AuthModal } from "./components/AuthModal";
+import { PaystackCheckoutModal } from "./components/PaystackCheckoutModal";
 import { HomePage } from "./pages/HomePage";
 import { PendingScreen } from "./pages/PendingScreen";
 import { StudentDashboard } from "./pages/StudentDashboard";
@@ -14,36 +16,34 @@ import { CertificatePage } from "./pages/CertificatePage";
 import { AdminDashboard } from "./pages/AdminDashboard";
 
 function MainContent() {
-  const { user, isEnrolled, isPending, isAdmin, loading } = useAuth();
-  const [currentTab, setCurrentTab] = useState<string>("home");
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
+  const { user, isEnrolled, isAdmin, loading } = useAuth();
+  const {
+    currentTab,
+    setCurrentTab,
+    goBack,
+    isAuthModalOpen,
+    authMode,
+    openAuthModal,
+    closeAuthModal,
+    registerModal,
+  } = useNavigation();
 
-  // Route user according to status on initial load or auth change
-  useEffect(() => {
-    if (loading) return;
-    if (user) {
-      if (isAdmin && currentTab === "home") {
-        setCurrentTab("dashboard");
-      } else if (isEnrolled && currentTab === "home") {
-        setCurrentTab("dashboard");
-      } else if (isPending && currentTab === "home") {
-        setCurrentTab("pending");
-      }
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+
+  // Register Checkout Modal with Android Back Button support
+  React.useEffect(() => {
+    if (isCheckoutModalOpen) {
+      return registerModal("paystackCheckoutModal", () => setIsCheckoutModalOpen(false));
     }
-  }, [user, isEnrolled, isPending, isAdmin, loading]);
-
-  const handleOpenAuth = (mode: "login" | "signup" = "signup") => {
-    setAuthMode(mode);
-    setIsAuthModalOpen(true);
-  };
+  }, [isCheckoutModalOpen, registerModal]);
 
   return (
     <div className="min-h-screen flex flex-col bg-transparent text-[var(--text-main)] transition-colors selection:bg-orange-500/20 selection:text-orange-950 dark:selection:text-orange-200">
       <Navbar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
-        onOpenAuth={handleOpenAuth}
+        onOpenAuth={openAuthModal}
+        onOpenCheckout={() => setIsCheckoutModalOpen(true)}
       />
 
       <main className="flex-1">
@@ -60,8 +60,9 @@ function MainContent() {
           <>
             {currentTab === "home" && (
               <HomePage
-                onRegisterClick={() => handleOpenAuth("signup")}
-                onNavigate={(tab) => setCurrentTab(tab)}
+                onRegisterClick={() => openAuthModal("signup")}
+                onOpenCheckout={() => setIsCheckoutModalOpen(true)}
+                onNavigate={(tab) => setCurrentTab(tab as NavTab)}
                 onExploreCurriculum={() => {
                   const el = document.getElementById("curriculum");
                   if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -74,42 +75,48 @@ function MainContent() {
             )}
 
             {currentTab === "dashboard" && isEnrolled && (
-              <StudentDashboard onNavigate={setCurrentTab} />
+              <StudentDashboard onNavigate={(tab) => setCurrentTab(tab as NavTab)} />
             )}
 
             {currentTab === "classes" && isEnrolled && (
-              <LiveClassesPage />
+              <LiveClassesPage onBack={() => setCurrentTab("dashboard")} />
             )}
 
             {currentTab === "recordings" && isEnrolled && (
-              <RecordingsPage />
+              <RecordingsPage onBack={() => setCurrentTab("dashboard")} />
             )}
 
             {currentTab === "materials" && isEnrolled && (
-              <MaterialsPage />
+              <MaterialsPage onBack={() => setCurrentTab("dashboard")} />
             )}
 
             {currentTab === "certificate" && isEnrolled && (
-              <CertificatePage />
+              <CertificatePage onBack={() => setCurrentTab("dashboard")} />
             )}
 
             {currentTab === "profile" && user && (
-              <ProfilePage />
+              <ProfilePage onBack={() => setCurrentTab(isEnrolled ? "dashboard" : "home")} />
             )}
 
             {currentTab === "admin" && isAdmin && (
-              <AdminDashboard />
+              <AdminDashboard onBack={() => setCurrentTab("dashboard")} />
             )}
           </>
         )}
       </main>
 
-      <Footer onOpenAuth={() => handleOpenAuth("login")} />
+      <Footer onOpenAuth={() => openAuthModal("login")} />
 
       <AuthModal
         isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
+        onClose={closeAuthModal}
         initialMode={authMode}
+      />
+
+      <PaystackCheckoutModal
+        isOpen={isCheckoutModalOpen}
+        onClose={() => setIsCheckoutModalOpen(false)}
+        onSuccessRedirect={() => setCurrentTab("dashboard")}
       />
     </div>
   );
@@ -118,7 +125,9 @@ function MainContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <MainContent />
+      <NavigationProvider>
+        <MainContent />
+      </NavigationProvider>
     </AuthProvider>
   );
 }

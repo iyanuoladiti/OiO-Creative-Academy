@@ -20,7 +20,7 @@ import {
   Announcement,
   PaymentRecord,
 } from "../types";
-import { ACADEMY_CONFIG, formatNaira } from "../config";
+import { ACADEMY_CONFIG, formatNaira, getPaystackPublicKey, setPaystackPublicKey } from "../config";
 import { OiOLogo } from "../components/OiOLogo";
 import { verifyPaymentWithAI, AIPaymentVerificationResult } from "../services/aiPaymentVerifier";
 import {
@@ -43,10 +43,17 @@ import {
   Copy,
   Check,
   Bot,
+  ArrowLeft,
 } from "lucide-react";
+import { useNavigation } from "../context/NavigationContext";
 
-export const AdminDashboard: React.FC = () => {
+interface AdminDashboardProps {
+  onBack?: () => void;
+}
+
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
   const { isAdmin } = useAuth();
+  const { registerModal } = useNavigation();
   const [activeTab, setActiveTab] = useState<"students" | "classes" | "recordings" | "materials" | "announcements" | "payments">("students");
 
   // State
@@ -59,6 +66,8 @@ export const AdminDashboard: React.FC = () => {
 
   // Search filter
   const [studentSearch, setStudentSearch] = useState("");
+  const [adminPaystackKey, setAdminPaystackKey] = useState(() => getPaystackPublicKey());
+  const [keySavedToast, setKeySavedToast] = useState(false);
 
   // Modals / Form States
   const [isClassModalOpen, setIsClassModalOpen] = useState(false);
@@ -67,6 +76,31 @@ export const AdminDashboard: React.FC = () => {
   const [isRecordingModalOpen, setIsRecordingModalOpen] = useState(false);
   const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
   const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
+
+  // Register modals so Android back button closes the active modal instead of exiting Chrome
+  useEffect(() => {
+    if (isClassModalOpen) {
+      return registerModal("adminClassModal", () => setIsClassModalOpen(false));
+    }
+  }, [isClassModalOpen, registerModal]);
+
+  useEffect(() => {
+    if (isRecordingModalOpen) {
+      return registerModal("adminRecModal", () => setIsRecordingModalOpen(false));
+    }
+  }, [isRecordingModalOpen, registerModal]);
+
+  useEffect(() => {
+    if (isMaterialModalOpen) {
+      return registerModal("adminMatModal", () => setIsMaterialModalOpen(false));
+    }
+  }, [isMaterialModalOpen, registerModal]);
+
+  useEffect(() => {
+    if (isAnnouncementModalOpen) {
+      return registerModal("adminAnnModal", () => setIsAnnouncementModalOpen(false));
+    }
+  }, [isAnnouncementModalOpen, registerModal]);
 
   // Form fields
   const [classForm, setClassForm] = useState({
@@ -530,7 +564,19 @@ export const AdminDashboard: React.FC = () => {
   });
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6 text-[var(--text-main)]">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 text-[var(--text-main)]">
+      {onBack && (
+        <div>
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-subtle)] text-xs font-semibold text-[var(--text-main)] transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+            <span>Back to Dashboard</span>
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
         <div className="space-y-2">
@@ -1067,6 +1113,44 @@ export const AdminDashboard: React.FC = () => {
             <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
               Mode: {ACADEMY_CONFIG.PAYMENT_MODE}
             </span>
+          </div>
+
+          {/* Paystack Gateway Configuration Card */}
+          <div className="p-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-emerald-600" />
+                <span className="font-bold text-xs text-[var(--text-main)]">
+                  Paystack Payment Gateway Configuration
+                </span>
+              </div>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-semibold">
+                Inline JS Popup Active
+              </span>
+            </div>
+            <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+              Amounts are dynamically calculated in the cart, converted to Kobo (multiplied by 100), and processed through PaystackPop.setup(). You can configure your public key below:
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="text"
+                value={adminPaystackKey}
+                onChange={(e) => setAdminPaystackKey(e.target.value)}
+                placeholder="pk_test_... or pk_live_..."
+                className="flex-1 px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-xs font-mono text-[var(--text-main)] focus:outline-none focus:border-[var(--accent-orange)]"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setPaystackPublicKey(adminPaystackKey);
+                  setKeySavedToast(true);
+                  setTimeout(() => setKeySavedToast(false), 2500);
+                }}
+                className="px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--accent-orange)] text-white hover:bg-[var(--accent-orange-hover)] transition-colors shrink-0"
+              >
+                {keySavedToast ? "Saved!" : "Save Public Key"}
+              </button>
+            </div>
           </div>
 
           <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-x-auto shadow-xs">

@@ -55,7 +55,9 @@ export const ACADEMY_CONFIG = {
     NOTE: "Please include your full name or email as the transfer narration so we can approve your seat immediately.",
   },
 
-  PAYSTACK_PUBLIC_KEY: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "pk_test_placeholder_key",
+  get PAYSTACK_PUBLIC_KEY(): string {
+    return getPaystackPublicKey();
+  },
 
   // Authorized Admin Emails
   ADMIN_EMAIL: "oioserviceshq@gmail.com",
@@ -151,3 +153,27 @@ export function formatNaira(amount: number): string {
     maximumFractionDigits: 0,
   }).format(amount);
 }
+
+export function getPaystackPublicKey(): string {
+  if (typeof window !== "undefined") {
+    const custom = localStorage.getItem("oio_paystack_public_key");
+    if (custom && custom.trim().startsWith("pk_")) {
+      return custom.trim();
+    }
+  }
+  return (
+    import.meta.env.VITE_PAYSTACK_PUBLIC_KEY ||
+    "pk_test_156c4d3e5b721869e5d4cb941e7542fa79ec0389"
+  );
+}
+
+export function setPaystackPublicKey(key: string): void {
+  if (typeof window !== "undefined") {
+    if (key && key.trim()) {
+      localStorage.setItem("oio_paystack_public_key", key.trim());
+    } else {
+      localStorage.removeItem("oio_paystack_public_key");
+    }
+  }
+}
+

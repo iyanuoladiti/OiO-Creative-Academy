@@ -34,6 +34,14 @@ interface AuthContextType {
   logout: () => Promise<void>;
   updateContactInfo: (whatsapp: string, displayName?: string) => Promise<void>;
   submitPaymentProof: (reference: string, notes?: string, mode?: "manual" | "paystack") => Promise<void>;
+  confirmPaystackSuccess: (params: {
+    reference: string;
+    amountNaira: number;
+    amountKobo: number;
+    customerEmail: string;
+    customerName: string;
+    notes?: string;
+  }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -230,6 +238,59 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const confirmPaystackSuccess = async ({
+    reference,
+    amountNaira,
+    amountKobo,
+    customerEmail,
+    customerName,
+    notes,
+  }: {
+    reference: string;
+    amountNaira: number;
+    amountKobo: number;
+    customerEmail: string;
+    customerName: string;
+    notes?: string;
+  }) => {
+    const targetUid = user?.uid || `guest_${Date.now()}`;
+    const paymentData: Omit<PaymentRecord, "id"> = {
+      userId: targetUid,
+      userEmail: customerEmail.trim(),
+      userName: customerName.trim() || "Student",
+      amountNaira,
+      amountKobo,
+      mode: "paystack",
+      reference: reference.trim(),
+      status: "verified",
+      notes: notes || "Verified Paystack Online Checkout",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      await addDoc(collection(db, "payments"), paymentData);
+
+      // If user is currently signed in, immediately upgrade enrollmentStatus to enrolled!
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const updates: Partial<UserProfile> = {
+          enrollmentStatus: "enrolled",
+          enrolledAt: new Date().toISOString(),
+          notes: `Paystack Verified Ref: ${reference.trim()}`,
+          updatedAt: new Date().toISOString(),
+        };
+        await updateDoc(userDocRef, updates);
+        if (profile) {
+          setProfile({ ...profile, ...updates });
+        }
+      }
+    } catch (err) {
+      console.error("Error saving verified Paystack payment:", err);
+      handleFirestoreError(err, OperationType.CREATE, "payments");
+    }
+  };
+
   const isAdmin = isAdminState || profile?.role === "admin";
   const isEnrolled = isAdmin || profile?.enrollmentStatus === "enrolled";
   const isPending = !isAdmin && profile?.enrollmentStatus === "pending";
@@ -249,6 +310,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         updateContactInfo,
         submitPaymentProof,
+        confirmPaystackSuccess,
       }}
     >
       {children}

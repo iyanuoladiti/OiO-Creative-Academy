@@ -32,11 +32,13 @@ interface HomePageProps {
   onRegisterClick: () => void;
   onExploreCurriculum: () => void;
   onNavigate?: (tab: string) => void;
+  onOpenCheckout?: () => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
   onRegisterClick,
   onNavigate,
+  onOpenCheckout,
 }) => {
   const { user, isEnrolled, isPending } = useAuth();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -50,6 +52,8 @@ export const HomePage: React.FC<HomePageProps> = ({
       if (onNavigate) onNavigate("dashboard");
     } else if (isPending) {
       if (onNavigate) onNavigate("pending");
+    } else if (onOpenCheckout) {
+      onOpenCheckout();
     } else {
       onRegisterClick();
     }

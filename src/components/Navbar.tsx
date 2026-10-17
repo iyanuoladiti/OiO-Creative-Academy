@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigation, NavTab } from "../context/NavigationContext";
 import { ACADEMY_CONFIG, getWhatsAppRegistrationLink } from "../config";
 import { OiOLogo } from "./OiOLogo";
 import {
@@ -22,13 +23,19 @@ import {
 
 interface NavbarProps {
   currentTab: string;
-  setCurrentTab: (tab: string) => void;
+  setCurrentTab: (tab: NavTab) => void;
   onOpenAuth: (mode?: "login" | "signup") => void;
+  onOpenCheckout?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpenAuth }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  currentTab,
+  setCurrentTab,
+  onOpenAuth,
+  onOpenCheckout,
+}) => {
   const { user, profile, isAdmin, isEnrolled, isPending, logout } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isMobileMenuOpen, setIsMobileMenuOpen, closeMobileMenu } = useNavigation();
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
       return document.documentElement.classList.contains("dark") ||
@@ -50,9 +57,9 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
     }
   };
 
-  const handleNavClick = (tab: string) => {
+  const handleNavClick = (tab: NavTab) => {
     setCurrentTab(tab);
-    setMobileMenuOpen(false);
+    closeMobileMenu();
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -232,27 +239,27 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
                 Sign In
               </button>
               <button
-                onClick={() => onOpenAuth("signup")}
-                className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-[var(--accent-orange)] text-white shadow-sm hover:bg-[var(--accent-orange-hover)] transition-all"
+                onClick={() => (onOpenCheckout ? onOpenCheckout() : onOpenAuth("signup"))}
+                className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-[var(--accent-orange)] text-white shadow-sm hover:bg-[var(--accent-orange-hover)] transition-all flex items-center gap-1.5"
               >
-                Reserve Seat
+                <span>Reserve Seat</span>
               </button>
             </div>
           )}
 
           {/* Mobile Menu trigger */}
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="md:hidden p-2 rounded-xl text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]"
             aria-label="Toggle navigation menu"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>
 
       {/* Mobile Menu Dropdown */}
-      {mobileMenuOpen && (
+      {isMobileMenuOpen && (
         <div className="md:hidden border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] px-4 py-4 space-y-2 shadow-xl animate-in slide-in-from-top-2">
           {(!user || !isEnrolled) && (
             <button
@@ -350,7 +357,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <button
                   onClick={() => {
-                    setMobileMenuOpen(false);
+                    closeMobileMenu();
                     onOpenAuth("login");
                   }}
                   className="w-full py-2 px-3 rounded-lg text-xs font-semibold border border-[var(--border-subtle)] text-[var(--text-main)]"
@@ -359,18 +366,22 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
                 </button>
                 <button
                   onClick={() => {
-                    setMobileMenuOpen(false);
-                    onOpenAuth("signup");
+                    closeMobileMenu();
+                    if (onOpenCheckout) {
+                      onOpenCheckout();
+                    } else {
+                      onOpenAuth("signup");
+                    }
                   }}
                   className="w-full py-2 px-3 rounded-lg text-xs font-semibold bg-[var(--accent-orange)] text-white"
                 >
-                  Register
+                  Reserve Seat
                 </button>
               </div>
             ) : (
               <button
                 onClick={() => {
-                  setMobileMenuOpen(false);
+                  closeMobileMenu();
                   logout();
                 }}
                 className="w-full py-2 px-3 rounded-lg text-xs font-semibold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/40"

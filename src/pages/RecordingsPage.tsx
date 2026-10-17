@@ -4,9 +4,13 @@ import { db, handleFirestoreError, OperationType } from "../firebase";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { Recording } from "../types";
 import { YouTubeLite } from "../components/YouTubeLite";
-import { BookOpen, Calendar, Clock, FileText, ExternalLink, Download } from "lucide-react";
+import { BookOpen, Calendar, Clock, FileText, ExternalLink, Download, ArrowLeft } from "lucide-react";
 
-export const RecordingsPage: React.FC = () => {
+interface RecordingsPageProps {
+  onBack?: () => void;
+}
+
+export const RecordingsPage: React.FC<RecordingsPageProps> = ({ onBack }) => {
   const { user } = useAuth();
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +37,19 @@ export const RecordingsPage: React.FC = () => {
   }, [user]);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8 text-[var(--text-main)]">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8 text-[var(--text-main)]">
+      {onBack && (
+        <div>
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-subtle)] text-xs font-semibold text-[var(--text-main)] transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-[var(--accent-orange)]" />
+            <span>Back to Dashboard</span>
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="space-y-2 border-b border-[var(--border-subtle)] pb-6">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--accent-orange-soft)] text-[var(--accent-orange)] text-xs font-bold">

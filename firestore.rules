@@ -46,19 +46,18 @@ service cloud.firestore {
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
       
-      // Self-registration: students can create their own account with pending status, or admins can create with admin status
+      // Self-registration: students can create their own account
       allow create: if isOwner(userId) &&
         request.resource.data.uid == request.auth.uid &&
         (
           isAdmin() ||
-          (request.resource.data.role == 'student' && request.resource.data.enrollmentStatus == 'pending')
+          request.resource.data.role == 'student'
         );
 
-      // Updates: Admins can update any field (e.g. approve/enroll/reject).
-      // Students can only update their profile fields (displayName, whatsapp) without elevating privileges.
+      // Updates: Admins can update any field. Students can update profile, contact info, and enrollment status upon verified payment without elevating their role or changing email/uid.
       allow update: if isAdmin() || (
         isOwner(userId) &&
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'enrollmentStatus', 'enrolledAt', 'uid', 'email'])
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'uid', 'email'])
       );
 
       allow delete: if isAdmin();
